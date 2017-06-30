@@ -1,0 +1,284 @@
+/**封装confirm方法
+ * @param arg1 {Object/String/Number} 可以为object，也可以为string/number,为string/number时title、ico为默认值，非必传参数
+ * @param arg1.title {String} 提示框标题，可为空默认值为"系统提示"
+ * @param arg1.mess {String/Number} 提示的信息，可为空默认值为"确定要执行操作吗？"
+ * @param arg1.ico {String} 提示图标，warn：蓝色感叹号，ask：橙色问号，succeed，绿色对号，可为空默认值为ask
+ * @param arg2 {Function}	确认回调函数，非必传参数
+ * @param arg3 {Function}	取消回调函数，非必传参数
+  */
+function confirm(arg1,arg2,arg3){
+	var icopath=basePath+"comm/images/";
+	var setOpt={
+		title:"系统提示",
+		mess:"是否确认您的操作？",
+		ico:"ask"
+		}
+	if(typeof(arg1)==='object'){
+		jQuery.extend(setOpt,arg1);
+	}else if(typeof(arg1)==='string' || typeof(arg1)==='number'){
+		setOpt.mess=arg1 || "是否确认您的操作？";
+	}else{
+		setOpt=setOpt;
+	}
+	$(".confirmPop_modal").remove();
+	var confirmmodal="<div class='confirmPop_modal' style='width:100%; height:100%; position:fixed; top:0;left:0;right:0; bottom:0; z-index:9999;display:none;'>";
+	confirmmodal+="<div class='confirmbg' style='width:100%; height:"+$(window).height()+"px; background:#000; opacity:0;'></div>";
+	confirmmodal+="<div class='confirmwin' style='width:426px;position:absolute; left:50%; top:47%; opacity:0; border:solid 3px #939393; margin-left:-175px; background:#fff; overflow:hidden;'>";
+	confirmmodal+="<div class='confirmtit' style='width:100%; height:50px;overflow:hidden; font: bold 20px/50px \"Microsoft YaHei\";padding:0 15px; color:#333;background:#ececec;'>"+setOpt.title+"<span onclick='doCancel();' class='confirmclose' style='float:right; color:#c0c0c0; cursor:pointer; font-family:sans-serif;font-size:28px; font-weight:50'>×</span></div>";
+	confirmmodal+="<div class='confirmmess' style='padding:35px 20px 35px 25px;width:auto;display:inline-block;'>";
+	switch(setOpt.ico){
+	case "warn":confirmmodal+="<span class='confirmonlyico' style='width:48px;padding-right:48px;height:48px;float:left;position:relative;margin-right:15px;background:url("+icopath+"modalico.png) 0 0 no-repeat;'></span>";break;
+	case "succeed":confirmmodal+="<span class='confirmonlyico' style='width:48px;padding-right:48px;height:48px;float:left;position:relative;margin-right:15px;background:url("+icopath+"modalico.png) 0 -48px no-repeat;' class=''></span>";break;
+	default:confirmmodal+="<span class='confirmonlyico' style='width:48px;padding-right:48px;height:48px;float:left;position:relative;margin-right:15px;background:url("+icopath+"modalico.png) 0 -96px no-repeat;' class=''></span>";break;
+	}
+	confirmmodal+="<span class='confirmonlymess' style='height:50px;position:relative;top:-3px; display:table-cell;vertical-align:middle; color:#333;font:normal 16px/25px \"Microsoft YaHei\";max-width:310px;word-break: break-all'>"+setOpt.mess+"</span></div>";
+	confirmmodal+=" <div class='confirmbtnarea' style='padding:0 0 30px 0;text-align:center;'>";
+	confirmmodal+="<button onclick='doOk();' class='confirmsure' style='background:#ff8b35; color:#fff; font:normal 14px/40px \"Microsoft YaHei\"; border:none; width:90px;height:40px;text-align:center;margin-right:20px;border-radius:3px;outline:none;'>确定</button>";
+	confirmmodal+="<button onclick='doCancel();' class='confirmcancel' style='background:#ccc; color:#666; font:normal 14px/40px \"Microsoft YaHei\";border:none;width:90px;height:40px;text-align:center;border-radius:3px;outline:none;'>取消</button>";
+	confirmmodal+="</div></div></div>";
+	$("body").append(confirmmodal);
+	if (navigator.userAgent.indexOf('Firefox') >= 0){
+		$(".confirmmess").css({"display":"flex","justify-content":"center","align-items":"center"});
+		$(".confirmonlyico").css({"align-self":"flex-start"});
+		$(".confirmonlymess").css({"display":"flex","align-items":"center","height":"auto"});
+	}
+	$(".confirmPop_modal").css("display","block");
+	$(".confirmbg").animate({opacity:0.6},200);
+	$(".confirmwin").animate({opacity:"1",top:"50%"},200);
+	$(".confirmmess").css("marginLeft",(366-$(".confirmmess").width())*0.5+"px");
+	var dialogmgt=-parseInt($(".confirmwin").height()*0.5)-50;
+	$(".confirmwin").css("marginTop",dialogmgt+"px");
+	$("body").css({"overflow-y":"hidden","padding-right":"17px"});
+	document.body.onselectstart = function() {
+		return false;
+	};
+	this.doCancel=function(){
+		$(".confirmbg").animate({opacity:0},200);
+		$(".confirmwin").animate({opacity:"0",top:"47%"},200);
+		setTimeout(function(){$(".confirmPop_modal").remove();$("body").css({"overflow-y":"auto","padding-right":"0"});},200);
+		document.body.onselectstart = function() {};
+		if(typeof(arg1)==='function' && typeof(arg2)==='function'){
+			arg2();
+			return;
+		}else if (typeof(arg3)==='function') {
+			arg3();
+			return;
+		}else{
+			return;
+		}
+		}
+	this.doOk = function() {
+		$(".confirmbg").animate({opacity:0},200);
+		$(".confirmwin").animate({opacity:"0",top:"47%"},200);
+		setTimeout(function(){$(".confirmPop_modal").remove();$("body").css({"overflow-y":"auto","padding-right":"0"})},200);
+		document.body.onselectstart = function() {};
+		if(typeof(arg1)==='function'){
+			arg1();
+			return;
+		}else if(typeof(arg2)==='function') {
+			arg2();
+			return;
+		}else{
+			return;
+		}
+	}
+}
+
+/**封装alert方法
+ * @param arg1 {Object/String/Number} 可以为object，也可以为string/number,为string/number时title、ico为默认值，非必传参数
+ * @param arg1.title {String} 提示框标题，可为空默认值为"系统提示"
+ * @param arg1.mess {String/Number} 提示的信息，可为空默认值为"请确认您的操作！"
+ * @param arg1.ico {String} 提示图标，warn：蓝色感叹号，ask：橙色问号，succeed，绿色对号，可为空默认值为warn
+ * @param arg2 {Function}	确认回调函数，非必传参数
+ */
+function alert(arg1,arg2){
+	var icopath=basePath+"comm/images/";
+	var setOpt={
+		title:"系统提示",
+		mess:"请确认您的操作！",
+		ico:"warn"
+	}
+	if(typeof(arg1)==='object'){
+		jQuery.extend(setOpt,arg1);
+	}else if(typeof(arg1)==='string' || typeof(arg1)==='number'){
+		setOpt.mess=arg1 || "请确认您的操作！";
+	}else{
+		setOpt=setOpt;
+	}
+	$(".alertPop_modal").remove();
+	var alertmodal="<div class='alertPop_modal' style='width:100%; height:100%; position:fixed; top:0;left:0;right:0; bottom:0; z-index:9999;display:none;'>";
+	alertmodal+="<div class='alertbg' style='width:100%; height:"+$(window).height()+"px; background:#000; opacity:0;'></div>";
+	alertmodal+="<div class='alertwin' style='width:426px;position:absolute; left:50%; top:47%; opacity:0; border:solid 3px #939393; margin-left:-175px; background:#fff; overflow:hidden;'>";
+	alertmodal+="<div class='alerttit' style='width:100%; height:50px;overflow:hidden; font: bold 20px/50px \"Microsoft YaHei\";padding:0 15px; color:#333;background:#ececec;'>"+setOpt.title+"<span onclick='doCancel();' class='alertclose' style='float:right; color:#aaa; cursor:pointer;font-family:\"Microsoft YaHei\";font-size:25px;'>×</span></div>";
+	alertmodal+="<div class='alertmess' style='padding:35px 20px 35px 25px;width:auto;display:inline-block;'>";
+	switch(setOpt.ico){
+	case "ask":alertmodal+="<span class='alertonlyico' style='width:48px;padding-right:48px;height:48px;float:left;position:relative;margin-right:15px;background:url("+icopath+"modalico.png) 0 -96px no-repeat;' class=''></span>";break;
+	case "succeed":alertmodal+="<span class='alertonlyico' style='width:48px;padding-right:48px;height:48px;float:left;position:relative;margin-right:15px;background:url("+icopath+"modalico.png) 0 -48px no-repeat;' class=''></span>";break;
+	default:alertmodal+="<span class='alertonlyico' style='width:48px;padding-right:48px;height:48px;float:left;position:relative;margin-right:15px;background:url("+icopath+"modalico.png) 0 0 no-repeat;' class=''></span>";break;
+	}
+	alertmodal+="<span class='alertonlymess' style='height:50px;position:relative;top:-3px;display:table-cell;vertical-align:middle; color:#333;font:normal 16px/25px \"Microsoft YaHei\";max-width:310px;word-break: break-all'>"+setOpt.mess+"</span></div>";
+	alertmodal+=" <div class='alertbtnarea' style='padding:0 0 30px 0;text-align:center;'>";
+	alertmodal+="<button onclick='doOk();' class='alertsure' style='background:#ff8b35; color:#fff; font:normal 14px/40px \"Microsoft YaHei\"; border:none; width:90px;height:40px;text-align:center;margin-right:20px;border-radius:3px;outline:none;'>确定</button>";
+	alertmodal+="</div></div></div>";
+	$("body").append(alertmodal);
+	if (navigator.userAgent.indexOf('Firefox') >= 0){
+	$(".alertmess").css({"display":"flex","justify-content":"center","align-items":"center"});
+	$(".alertonlyico").css({"align-self":"flex-start"});
+	$(".alertonlymess").css({"display":"flex","align-items":"center","height":"auto"});
+	}
+	$(".alertPop_modal").css("display","block");
+	$(".alertbg").animate({opacity:0.6},200);
+	$(".alertwin").animate({opacity:"1",top:"50%"},200);
+	$(".alertmess").css("marginLeft",(366-$(".alertmess").width())*0.5+"px");
+	var dialogmgt=-parseInt($(".alertwin").height()*0.5)-50;
+	$(".alertwin").css("marginTop",dialogmgt+"px");
+	$("body").css({"overflow-y":"hidden","padding-right":"17px"});
+	document.body.onselectstart = function() {
+		return false;
+	};
+	this.doCancel=function(){
+		$(".alertbg").animate({opacity:0},200);
+		$(".alertwin").animate({opacity:"0",top:"47%"},200);
+		setTimeout(function(){$(".alertPop_modal").remove();$("body").css({"overflow-y":"auto","padding-right":"0"});},200);
+		}
+	this.doOk = function() {
+		$(".alertbg").animate({opacity:0},200);
+		$(".alertwin").animate({opacity:"0",top:"47%"},200);
+		setTimeout(function(){$(".alertPop_modal").remove();$("body").css({"overflow-y":"auto","padding-right":"0"});},200);
+		document.body.onselectstart = function() {};
+		if(typeof(arg1)==='function'){
+			arg1();
+			return;
+		}else if(typeof(arg2)==='function'){
+			arg2();
+			return;
+		}else{
+			return
+		}
+	}
+}
+
+
+/**封装prompt方法
+ * @param arg1 {Object/String/Number} 可以为object，也可以为string/number,为string/number时title、init为默认值，非必传参数
+ * @param arg1.title {String} 提示框标题，可为空默认值为"系统提示"
+ * @param arg1.mess {String/Number} 提示的信息，可为空默认值为"请输入信息！"
+ * @param arg1.init {String} 输入框初始值，默认为空，若有值时为选中状态
+ * @param arg2(txt){} {Function}	确认回调函数，非必传参数
+ * @param txt {String} 确认时回调函数传回的输入值
+ */
+function prompt(arg1,arg2){
+	var setOpt={
+		title:"系统提示",
+		mess:"请输入信息！",
+		init:""
+	}
+	if(arguments.length>2){
+		setOpt.mess="prompt参数设置错误！";
+	}else{
+		if(typeof(arg1)==='object'){
+			jQuery.extend(setOpt,arg1);
+		}else if(typeof(arg1)==='string' || typeof(arg1)==='number'){
+			setOpt.mess=arg1;
+		}else{
+			setOpt=setOpt;
+		}
+	}
+	$(".promptPop_modal").remove();
+	var promptmodal="<div class='promptPop_modal' style='width:100%; height:100%; position:fixed; top:0;left:0;right:0; bottom:0; z-index:9999;display:none;'>";
+	promptmodal+="<div class='promptbg' style='width:100%; height:"+$(window).height()+"px; background:#000; opacity:0;'></div>";
+	promptmodal+="<div class='promptwin' style='width:426px;position:absolute; left:50%; top:47%; opacity:0; border:solid 3px #939393; margin-left:-175px; background:#fff; overflow:hidden;'>";
+	promptmodal+="<div class='prompttit' style='width:100%; height:50px; overflow:hidden; font: bold 20px/50px \"Microsoft YaHei\";padding:0 15px; color:#333;background:#ececec;'>"+setOpt.title+"<span onclick='doCancel();' class='promptclose' style='float:right; color:#aaa; cursor:pointer;font-family:\"Microsoft YaHei\";font-size:25px;'>×</span></div>";
+	promptmodal+="<div class='promptmess' style='padding:35px 20px 0 25px;width:auto;display:inline-block;margin-left:60px'>";
+	promptmodal+="<span class='promptonlymess' style='height:50px;position:relative;top:-3px;color:#333;font:normal 16px/25px \"Microsoft YaHei\";max-width:310px;word-break: break-all'>"+setOpt.mess+"</span></div>";
+	promptmodal+="<div style='margin:15px 0 30px 20%'><input type='text' class='promptText' name='' value='"+setOpt.init+"' selected style='width:252px;height:33px;background:#f8f8f8;padding-left:5px;border:solid #ccc 1px;border-radius:3px;' /></div>"
+	promptmodal+=" <div class='promptbtnarea' style='padding:0 0 30px 0;text-align:center;'>";
+	promptmodal+="<button onclick='doOk();' class='promptsure' style='background:#ff8b35; color:#fff; font:normal 14px/40px \"Microsoft YaHei\"; border:none; width:90px;height:40px;text-align:center;margin-right:20px;border-radius:3px;outline:none;'>确定</button>";
+	promptmodal+="</div></div></div>";
+	$("body").append(promptmodal);
+	$(".promptPop_modal").css("display","block");
+	$(".promptbg").animate({opacity:0.6},200);
+	$(".promptwin").animate({opacity:"1",top:"50%"},200);
+	var dialogmgt=-parseInt($(".promptwin").height()*0.5)-50;
+	$(".promptwin").css("marginTop",dialogmgt+"px");
+	$(".promptText").focus().select();
+	$("body").css({"overflow-y":"hidden","padding-right":"17px"});
+	document.body.onselectstart = function() {
+		return false;
+	};
+	this.doCancel=function(){
+		$(".promptbg").animate({opacity:0},200);
+		$(".promptwin").animate({opacity:"0",top:"47%"},200);
+		setTimeout(function(){$(".promptPop_modal").remove();$("body").css({"overflow-y":"auto","padding-right":"0"});},200);
+		}
+	this.doOk = function() {
+		var promptTxt=$(".promptText").val() || null;
+		$(".promptbg").animate({opacity:0},200);
+		$(".promptwin").animate({opacity:"0",top:"47%"},200);
+		setTimeout(function(){$(".promptPop_modal").remove();$("body").css({"overflow-y":"auto","padding-right":"0"});},200);
+		document.body.onselectstart = function() {};
+		if(typeof(arg1)==='function'){
+			arg1(promptTxt);
+			return;
+		}else if(typeof(arg2)==='function'){
+			arg2(promptTxt);
+			return;
+		}else{
+			return
+		}
+	}
+}
+
+
+/**封装cue方法,用于某些操作成功后给予用户提示，一秒后渐隐并在DOM中删除
+ * @param mess {String/Number} 提示信息，可为空默认值为"操作成功"
+ * @param ico {String} 提示图标，warn：蓝色感叹号，ask：橙色问号，succeed:绿色对号，可为空默认值为succed
+ */
+function cue(arg1,arg2){
+	var mess,ico;
+	var icopath=basePath+"comm/images/";
+	if(arguments.length>2){
+		mess="cue参数设置错误！";
+	}else{
+		if(typeof(arg1)==='string' || typeof(arg1)==='number'){
+			mess=arg1 || "操作成功！";
+		}else{
+			mess="操作成功！";
+		}
+		if(typeof(arg2)==='string'){
+			ico=arg2;
+		}else{
+			ico="succed";
+		}
+	}
+	$(".cuePop_modal").remove();
+	var cuemodal="<div class='cuePop_modal cuemess' style='display:none;z-index:99999;width:auto;padding:30px 50px;box-shadow:0 0 10px #000;border-radius:10px;background:#fff;position:fixed;top:50%;left:50%;'>";
+	switch(ico){
+		case "warn":cuemodal+="<span class='cueonlyico' style='width:48px;padding-right:48px;height:48px;float:left;position:relative;margin-right:15px;background:url("+icopath+"modalico.png) 0 0 no-repeat;' class=''></span>";break;
+		case "ask":cuemodal+="<span class='cueonlyico' style='width:48px;padding-right:48px;height:48px;float:left;position:relative;margin-right:15px;background:url("+icopath+"modalico.png) 0 -96px no-repeat;' class=''></span>";break;
+		default:cuemodal+="<span class='cueonlyico' style='width:48px;padding-right:48px;height:48px;float:left;position:relative;margin-right:15px;background:url("+icopath+"modalico.png) 0 -48px no-repeat;' class=''></span>";break;
+	}
+	cuemodal+="<span class='cueonlymess' style='height:50px;position:relative;top:-3px;display:table-cell;vertical-align:middle; color:#333;font:bold 16px/25px \"Microsoft YaHei\";max-width:310px;word-break: break-all'>"+mess+"</span></div>";
+	$("body").append(cuemodal);
+	if (navigator.userAgent.indexOf('Firefox') >= 0){
+		$(".cuemess").css({"display":"flex","justify-content":"center","align-items":"center"});
+		$(".cueonlyico").css({"align-self":"flex-start"});
+		$(".cueonlymess").css({"display":"flex","align-items":"center","height":"auto"});
+	}
+	$(".cuewin").animate({opacity:"1",top:"50%"},200);
+	var mgt=-parseInt(($(".cuemess").height()+60)*0.5);
+	var mgl=-parseInt(($(".cuemess").width()+100)*0.5);
+	$("body").css({"overflow-y":"hidden","padding-right":"17px"});
+	$(".cuePop_modal").css({"marginTop":(mgt-60)+"px","marginLeft":mgl+"px","opacity":0});
+	setTimeout(function(){
+		$(".cuePop_modal").show();
+		$(".cuePop_modal").animate({marginTop:mgt+"px",opacity:1},300,"swing");
+	},100)
+	setTimeout(function(){
+		$(".cuePop_modal").animate({opacity:0},300,"swing");
+	},1500)
+	setTimeout(function(){
+		$(".cuePop_modal").remove();
+		$("body").css({"overflow-y":"auto","padding-right":"0"});
+	},2000)
+}
